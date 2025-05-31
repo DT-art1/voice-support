@@ -37,14 +37,14 @@ blueprint:
     album name, etc. If there are multiple values (e.g. 5 song titles) they will be
     separated by a semicolon (`;`)|
 
-    |`media_type`|Will be one of the following: `"track"`, `"artist"`, `"album"`,
-    `"playlist"`, `"radio"`|
+    |`media_type`|Will be one of the following: ``"album"`, `"artist"`, `"audiobook"`,
+    `"playlist"`, `"podcast"`, `"radio"`, "track"`. Will be auto-determined if omitted.|
 
-    |`artist`|The artist requested in the voice command. Will be empty in case the
-    artist is not relevant or when there are multiple artists requested|
+    |`artist`|When specifying a track or album by name in the Media ID field,
+    you can optionally restrict results by this artist name.|
 
-    |`album`|The album requested in the voice command, will be empty in case the album
-    is not relevant or when multiple albums are requested|
+    |`album`|When specifying a track by name in the Media ID field,
+    you can optionally restrict results by this album name.|
 
     |`media_description`|The description used in the voice request to describe the
     media. For example if the voice request was "Play the best songs from Queen in
@@ -135,22 +135,25 @@ blueprint:
             text:
               multiline: true
               multiple: false
-          default: 'This argument is mandatory and must always be provided no matter
-            what!
+          default: 'This argument will be auto-determined if omitted.
 
-            "media_type" can only be one of 5 different values:
-
-            - "track" if the search is about a specific track or a list of tracks.
+            "media_type" can only be one of 7 different values:
 
             - "album" if the search is about an album or a list of albums.
 
             - "artist" if the search is about an artist.
 
+            - "audiobook" if the search is about an audiobook.
+
+            - "track" if the search is about a specific track or a list of tracks.
+
             - "playlist" if the search specifically requests a playlist.
+
+            - "podcast" if the search is about a podcast.
 
             - "radio" if the search is a radio channel.
 
-            media_type is mandatory and must always be provided. If a request does
+            media_type will be auto-determined if omitted. If a request does
             not match any of these types, for example when music from a specific genre
             is requested, then use "track" and provide a list of matching songs for
             the "media_id" parameter.'
@@ -161,10 +164,8 @@ blueprint:
             text:
               multiline: true
               multiple: false
-          default: '"artist" is the artist the user requests to play, or the artist
-            of a specific track if the user mentions it while requesting to play a
-            specific song. If the artist is unknown or there are multiple artists
-            requested, use an empty string.'
+          default: '"artist": When specifying a track or album by name in the Media ID field,
+            you can optionally restrict results by this artist name.'
         album_prompt:
           name: Album Prompt
           description: The prompt that the LLM will use to provide the album.
@@ -172,10 +173,8 @@ blueprint:
             text:
               multiline: true
               multiple: false
-          default: '"album" is the album the user requests to play, or the album a
-            specific track is from if the user mentions it when requesting to play
-            a specific song. If the album is unknown or there are multiple albums
-            requested, use an empty string.'
+          default: '"album": When specifying a track by name in the Media ID field,
+            you can optionally restrict results by this album name.'
         media_id_prompt:
           name: Media ID Prompt
           description: The prompt that the LLM will use to provide the media_id.
@@ -297,26 +296,25 @@ fields:
     selector:
       select:
         options:
-        - track
         - album
         - artist
+        - audiobook
         - playlist
+        - podcast
         - radio
+        - track
     name: Media Type
     description: !input media_type_prompt
-    required: true
   artist:
     selector:
       text:
     name: Artist
     description: !input artist_prompt
-    required: true
   album:
     selector:
       text:
     name: Album
     description: !input album_prompt
-    required: true
   media_id:
     selector:
       text:
@@ -328,7 +326,6 @@ fields:
       text:
     name: Media Description
     description: !input media_description_prompt
-    required: true
   area:
     selector:
       area:
